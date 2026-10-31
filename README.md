@@ -24,3 +24,52 @@
 ## 编译
 
 如果使用 Visual Studio，可创建 .NET Framework 4.8 WinForms 项目并替换源码。当前发布包使用 Windows 自带的 .NET Framework C# 编译器生成，适合 Windows 10/11。
+
+---
+
+# Network Initialization Tool
+
+A small Windows C# WinForms utility for refreshing local network settings after a proxy application has been closed but Windows or Steam has not fully refreshed its connection state.
+
+This tool is useful when Steam disconnects after a system proxy is disabled and only restarting Windows appears to restore the connection.
+
+## Features
+
+- Disables the current user's WinINet system proxy and broadcasts a Windows settings refresh
+- Resets the WinHTTP proxy with `netsh winhttp reset proxy`
+- Clears the local DNS cache with `ipconfig /flushdns`
+- Optionally resets the Winsock catalog with `netsh winsock reset`
+- Optionally resets the TCP/IP stack with `netsh int ip reset`
+- Optionally releases and renews the DHCP address with `ipconfig /release` and `ipconfig /renew`
+- System tray icon, live command output, and log copying
+
+The application manifest requests administrator privileges, so Windows displays a UAC prompt when the application starts. Winsock and TCP/IP resets may still require a Windows restart to take full effect. The tool does not restart the computer automatically.
+
+## Recommended usage
+
+1. Close your proxy application.
+2. Start `NetInitTool.exe` and accept the administrator prompt.
+3. Click **Refresh Proxy (No Restart)**.
+4. Wait a few seconds, then reopen Steam or use Steam's reconnect option.
+5. If the connection is still unavailable, select the Winsock and TCP/IP reset options and click **Run Selected Items**.
+6. Review the command log. Failed commands show their exit codes and error output.
+
+The quick refresh action runs the proxy refresh, WinHTTP proxy reset, and DNS cache flush. The more disruptive Winsock, TCP/IP, and DHCP options are available separately so they do not run on every quick refresh.
+
+## Requirements
+
+- Windows 10 or Windows 11
+- .NET Framework 4.8 for building and running the WinForms application
+- Administrator privileges for network reset commands
+
+## Build from source
+
+The repository includes a Visual Studio project file and a PowerShell build script. To build with Visual Studio, open `NetInitTool.csproj` and build the project as a .NET Framework 4.8 WinForms application.
+
+To build with the C# compiler included with Windows, run this from the repository directory:
+
+```powershell
+.\build.ps1
+```
+
+The build script generates the application icon and compiles `NetInitTool.exe`. The prebuilt executable is available in `dist\NetInitTool.exe`.
